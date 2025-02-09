@@ -19,63 +19,124 @@ The Clinical Trial Service is a web API built using ASP.NET Core that enables us
 - MediatR
 - FluentValidation
 - xUnit for unit testing
-- Docker file for containerization
+- Docker for containerization
 
-<br />
+---
 
-# Getting Started
+## Getting Started with Docker
+
+To run the project with a Docker container:
+
+1. Clone the GitHub repository.
+2. Set up an MS SQL container in the Docker Desktop app.
+3. Set up the database service.
+4. Configure the startup project.
+5. Run the service.
+
+### 2. Set Up MS SQL Container in Docker Desktop
+
+- If you don't have Docker Desktop installed, you can download it from [Docker's official website](https://www.docker.com/products/docker-desktop/).
+- Open the command prompt or PowerShell and run this command to get the MS SQL image:
+
+```powershell
+docker pull mcr.microsoft.com/mssql/server
+```
+
+- After downloading the MS SQL image, run this command to create an SQL container:
+
+```powershell
+docker run --name mssql --env ACCEPT_EULA=Y --env MSSQL_SA_PASSWORD=s4C0mplic@t3D.?1C! -p 1400:1433 -d mcr.microsoft.com/mssql/server:latest
+```
+
+- After successfully creating the container, check Docker and ensure that the container is running.
+
+> **Note:** If you change any container creation details, update the `DBConnectionDocker` string accordingly.
+
+### 3. Set Up Database Service
+
+To set up the service:
+
+- Open the `API` project.
+- Locate the `Program.cs` file.
+- Find the line starting with `builder.Services.AddDbContext` and set the method **GetConnectionString** with `"DBConnectionDocker"` as the input parameter.
+
+> **Note:** If you haven't changed anything, your `DBConnectionDocker` string should look like this:
+>
+> ```json
+> "DBConnectionDocker": "Server=host.docker.internal,1400;Database=ClinicalTrialDB;User Id=sa;Password=s4C0mplic@t3D.?1C!;TrustServerCertificate=True;"
+> ```
+
+### 4. Configure the Startup Project
+
+To configure the project to run in this mode:
+
+- In the toolbar, set the startup project as `API` and the debug target as `Container (Dockerfile)`.
+- If this option is not available:
+  - Right-click on the solution **Clinical Trial Service**.
+  - Click on `Configure Startup Projects...`.
+  - Under `Common Properties`, select `Multiple startup projects`.
+  - For the `API` project: **Action:** `Start`, **Debug Target:** `Container (Dockerfile)`. For all other projects, set the action to **None**.
+
+### 5. Run the Service
+
+---
+
+## Getting Started with MS SQL Server Standalone Instance
 
 To run the project locally:
-1. Clone the GitHub repository
-2. Set up an MS SQL Server instance
-3. Update the connection string in the Settings file
-4. Apply database migrations
-5. Run the API project
 
-#
+1. Clone the GitHub repository.
+2. Set up an MS SQL Server instance.
+3. Update the connection string and set up the database service.
+4. Configure the startup project.
+5. Run the service.
 
-2. **Set up an MS SQL Server instance**
+### 2. Set Up an MS SQL Server Instance
 
-- If you don't have MS SQL Server installed, you can install **SQL Server Express** from <a href="https://www.microsoft.com/en-us/sql-server/sql-server-downloads" target="_blank">Microsoft's official website</a>.
+- If you don't have MS SQL Server installed, you can download **SQL Server Express** from [Microsoft's official website](https://www.microsoft.com/en-us/sql-server/sql-server-downloads).
 - Create a database named `ClinicalTrialDB`.
-- Create an SQL user `clinical_user` with the password `SecurePassword123`.
+- Create an SQL user `clinical_user` with the password `SecurePassword123` and grant `sysadmin` privileges.
 
-<br />
-
-3. **Update the connection string in the settings file**
-
-If you created the database and user as described in Step 2, no further action is needed in this step.  
-Otherwise, you need to configure the database connection string.
+### 3. Update the Connection String and Set Up Database Service
 
 To update the connection string:
+
 - Open the `API` project.
 - Locate the `appsettings.json` file.
 - Find the `"DBConnection"` property and update its value according to your database configuration and SQL user.
 
-<br />
+To set up the service:
 
-4. **Apply Database Migrations**
+- Open the `API` project.
+- Locate the `Program.cs` file.
+- Find the line starting with `builder.Services.AddDbContext` and set the method **GetConnectionString** with `"DBConnection"` as the input parameter.
 
-The initial migration has already been created in the project. Now, you just need to update the database.
+> **Note:** Your `DBConnection` string should look like this:
+>
+> ```json
+> "DBConnection": "Server=your_server;Database=your_database;User Id=your_user;Password=SecurePassword123;TrustServerCertificate=True;"
+> ```
 
-To apply the migration:
-- Open the **Package Manager Console**.
-- Select the `Infrastructure` project.
-- Run the following command:
+### 4. Configure the Startup Project
 
-   ```powershell
-   Update-Database
-   ```
+To configure the project to run in this mode:
 
-#
+- In the toolbar, set the startup project as `API` and the debug target as `https`.
+- Alternatively:
+  - Right-click on the solution **Clinical Trial Service**.
+  - Click on `Configure Startup Projects...`.
+  - Under `Common Properties`, select `Multiple startup projects`.
+  - For the `API` project: **Action:** `Start`, **Debug Target:** `https`. For all other projects, set the action to **None**.
 
-<br /><br />
+### 5. Run the Service
 
-# Upload File Content
+---
+
+## Upload File Content
 
 This service uses `.json` files to add or update a clinical trial.
 
-## Example of a valid JSON file:
+### Example of a Valid JSON File
 
 ```json
 {
@@ -86,7 +147,9 @@ This service uses `.json` files to add or update a clinical trial.
    "status": "Not Started"
 }
 ```
-## JSON Schema
+
+### JSON Schema
+
 ```json
 {
    "$schema": "http://json-schema.org/draft-07/schema#",
@@ -103,4 +166,3 @@ This service uses `.json` files to add or update a clinical trial.
    "required": ["trialId", "title", "startDate", "status"],
    "additionalProperties": false
 }
-```
